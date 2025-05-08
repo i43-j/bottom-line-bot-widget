@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, ChevronDown, Send, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { v4 as uuidv4 } from 'uuid'; // For generating unique IDs
 
 interface Message {
   id: string;
@@ -15,8 +16,19 @@ export const ChatWidget = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isPulsing, setIsPulsing] = useState(false);
+  const [userId] = useState(() => {
+    // Check if userId exists in localStorage, if not generate a new one
+    const storedId = localStorage.getItem('chatWidgetUserId');
+    if (storedId) return storedId;
+    
+    const newId = uuidv4();
+    localStorage.setItem('chatWidgetUserId', newId);
+    return newId;
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const pulseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Add welcome message when widget is first opened
   useEffect(() => {
@@ -41,7 +53,28 @@ export const ChatWidget = () => {
   useEffect(() => {
     if (isOpen) {
       inputRef.current?.focus();
+      // When opened, clear the pulse effect
+      if (pulseTimeoutRef.current) {
+        clearTimeout(pulseTimeoutRef.current);
+        setIsPulsing(false);
+      }
+    } else {
+      // Start the pulse timer when chat is minimized
+      if (pulseTimeoutRef.current) {
+        clearTimeout(pulseTimeoutRef.current);
+      }
+      
+      pulseTimeoutRef.current = setTimeout(() => {
+        setIsPulsing(true);
+      }, 3000); // 3 seconds as requested
     }
+    
+    // Cleanup
+    return () => {
+      if (pulseTimeoutRef.current) {
+        clearTimeout(pulseTimeoutRef.current);
+      }
+    };
   }, [isOpen]);
 
   const toggleChat = () => {
@@ -64,7 +97,7 @@ export const ChatWidget = () => {
     setIsLoading(true);
     
     try {
-      // Send to webhook
+      // Send to webhook with the user ID in the required format
       const response = await fetch('https://mactest2.app.n8n.cloud/webhook/cb3e7489-f7ea-45bf-b8d2-646b7942479b', {
         method: 'POST',
         headers: {
@@ -73,7 +106,7 @@ export const ChatWidget = () => {
         body: JSON.stringify({
           message: userMessage.content,
           timestamp: userMessage.timestamp,
-          userId: 'website-visitor' // You can customize this with actual user IDs if available
+          userId: `{{ $json.body.userId }}:${userId}` // Format as requested
         }),
       });
       
@@ -124,8 +157,8 @@ export const ChatWidget = () => {
       {/* Chat Popup */}
       <div 
         className={cn(
-          "w-80 md:w-96 bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 mb-3",
-          isOpen ? "h-[500px] animate-slide-up" : "h-0 opacity-0 pointer-events-none"
+          "w-96 md:w-[420px] bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 mb-3",
+          isOpen ? "h-[550px] animate-slide-up" : "h-0 opacity-0 pointer-events-none"
         )}
       >
         {/* Chat Header */}
@@ -140,7 +173,7 @@ export const ChatWidget = () => {
         </div>
 
         {/* Messages Container */}
-        <div className="flex-1 p-4 overflow-y-auto h-[380px]">
+        <div className="flex-1 p-4 overflow-y-auto h-[420px]">
           <div className="space-y-4">
             {messages.map((msg) => (
               <div 
@@ -194,15 +227,17 @@ export const ChatWidget = () => {
       <button
         onClick={toggleChat}
         className={cn(
-          "bg-chatbot-red hover:bg-red-600 text-white rounded-full p-3 shadow-lg transition-all duration-300",
-          isOpen ? "scale-90" : "animate-fade-in"
+          "bg-chatbot-red hover:bg-red-600 text-white rounded-full p-4 shadow-lg transition-all duration-300",
+          isOpen ? "scale-90" : "animate-fade-in",
+          isPulsing && !isOpen ? "animate-[pulse_2s_infinite]" : ""
         )}
+        style={{ width: "64px", height: "64px", display: "flex", alignItems: "center", justifyContent: "center" }}
         aria-label="Open chat"
       >
         {isOpen ? (
-          <ChevronDown className="h-6 w-6" />
+          <ChevronDown className="h-7 w-7" />
         ) : (
-          <MessageCircle className="h-6 w-6" />
+          <MessageCircle className="h-7 w-7" />
         )}
       </button>
     </div>

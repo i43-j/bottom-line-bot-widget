@@ -1,73 +1,64 @@
-# Welcome to your Lovable project
 
-## Project info
+# Chat Widget
 
-**URL**: https://lovable.dev/projects/a8127934-bdea-4403-8e94-2dbb4384861c
+A customizable chat widget that can be easily integrated into any website.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- Sleek, minimalist design with a red theme
+- Expandable chat interface with smooth animations
+- Webhook integration for message handling
+- Mobile-responsive design
+- Easy to integrate into any website
 
-**Use Lovable**
+## Installation
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/a8127934-bdea-4403-8e94-2dbb4384861c) and start prompting.
+### Option 1: Using in a React application
 
-Changes made via Lovable will be committed automatically to this repo.
+```jsx
+import { ChatWidgetProvider } from './components/ChatWidgetProvider';
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+// In your component
+function App() {
+  return (
+    <>
+      {/* Your website content */}
+      <ChatWidgetProvider />
+    </>
+  );
+}
 ```
 
-**Edit a file directly in GitHub**
+### Option 2: Using the standalone script
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Add this to your HTML:
 
-**Use GitHub Codespaces**
+```html
+<script src="https://your-hosting-url.com/chat-widget.umd.js"></script>
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+The widget will initialize automatically.
 
-## What technologies are used for this project?
+## Configuration
 
-This project is built with:
+The widget is pre-configured to use the webhook URL:
+`https://mactest2.app.n8n.cloud/webhook/cb3e7489-f7ea-45bf-b8d2-646b7942479b`
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+To change the webhook URL, modify the `sendMessage` function in `src/components/ChatWidget.tsx`.
 
-## How can I deploy this project?
+## Customization
 
-Simply open [Lovable](https://lovable.dev/projects/a8127934-bdea-4403-8e94-2dbb4384861c) and click on Share -> Publish.
+- Colors: Edit the `chatbot` colors in `tailwind.config.ts`
+- Styles: Modify the component styles in `ChatWidget.tsx`
 
-## Can I connect a custom domain to my Lovable project?
+## Building the Standalone Widget
 
-Yes, you can!
+```sh
+npm run build:widget
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+This will create distribution files in `dist/widget/` that you can host on any CDN or web server.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## License
+
+MIT

@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { ChatWidgetProvider } from '@/components/ChatWidgetProvider';
 
 const Index = () => {

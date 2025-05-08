@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { initializeChatWidget } from './components/ChatWidgetProvider';
 
 // Initialize the widget when this file is loaded

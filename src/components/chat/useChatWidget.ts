@@ -99,7 +99,7 @@ export const useChatWidget = () => {
         body: JSON.stringify({
           message: userMessage.content,
           timestamp: userMessage.timestamp,
-          userId: `{{ $json.body.userId }}:${userId}` // Format as requested
+          userId: userId 
         }),
       });
       
@@ -108,16 +108,17 @@ export const useChatWidget = () => {
       }
       
       // For now we'll simulate a response since we don't know how your webhook returns data
-      setTimeout(() => {
-        const botResponse: Message = {
-          id: (Date.now() + 1).toString(),
-          content: "Thanks for your message! Our team will get back to you soon.",
-          sender: 'bot',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, botResponse]);
-        setIsLoading(false);
-      }, 1000);
+const data = await response.json();
+
+const botResponse: Message = {
+  id: (Date.now() + 1).toString(),
+  content: data.reply || "Sorry, I didn't understand that.",
+  sender: 'bot',
+  timestamp: new Date()
+};
+
+setMessages(prev => [...prev, botResponse]);
+setIsLoading(false);
       
     } catch (error) {
       console.error('Error sending message:', error);

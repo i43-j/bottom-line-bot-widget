@@ -53,13 +53,13 @@ To change the webhook URL, modify the `sendMessage` function in `src/components/
 To adjust the widget size:
 
 1. Open `src/components/ChatWidget.tsx`
-2. Modify the height value in the className string:
+2. Modify the height value in the className string to change the percentage of viewport height:
    ```jsx
-   isOpen ? "h-[500px] animate-slide-up" : "h-0 opacity-0 pointer-events-none"
+   isOpen ? "h-[40vh] max-h-[500px] animate-slide-up" : "h-0 opacity-0 pointer-events-none"
    ```
-3. Adjust the messages container height:
+3. Adjust the messages container height accordingly:
    ```jsx
-   <div className="flex-1 p-4 overflow-y-auto h-[370px] scroll-smooth">
+   <div className="flex-1 p-4 overflow-y-auto h-[calc(40vh-130px)] max-h-[370px] scroll-smooth">
    ```
 
 ### Header Label

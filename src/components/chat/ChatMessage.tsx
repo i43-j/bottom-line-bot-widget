@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { Message } from './types';
 
 interface ChatMessageProps {
-  message: Message;
+  message: Message & { isLoading?: boolean };
   formatTime: (date: Date) => string;
 }
 
@@ -18,7 +18,15 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, formatTime })
           : "bg-gray-100 text-chatbot-dark mr-auto shadow-sm"
       )}
     >
-      <span className="text-sm">{message.content}</span>
+      {message.isLoading ? (
+        <div className="flex items-center space-x-1">
+          <div className="w-2 h-2 rounded-full bg-gray-400 animate-[bounce_0.8s_infinite_0.1s]"></div>
+          <div className="w-2 h-2 rounded-full bg-gray-400 animate-[bounce_0.8s_infinite_0.2s]"></div>
+          <div className="w-2 h-2 rounded-full bg-gray-400 animate-[bounce_0.8s_infinite_0.3s]"></div>
+        </div>
+      ) : (
+        <span className="text-sm">{message.content}</span>
+      )}
       <span className="text-xs opacity-70 mt-1 self-end">
         {formatTime(message.timestamp)}
       </span>

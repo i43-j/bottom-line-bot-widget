@@ -30,14 +30,14 @@ export const ChatWidget = () => {
       <div 
         className={cn(
           "w-96 md:w-[420px] bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 mb-3",
-          isOpen ? "h-[550px] animate-slide-up" : "h-0 opacity-0 pointer-events-none"
+          isOpen ? "h-[250px] animate-slide-up" : "h-0 opacity-0 pointer-events-none"
         )}
       >
         {/* Chat Header */}
         <ChatHeader toggleChat={toggleChat} />
 
         {/* Messages Container */}
-        <div className="flex-1 p-4 overflow-y-auto h-[420px] scroll-smooth">
+        <div className="flex-1 p-4 overflow-y-auto h-[120px] scroll-smooth">
           <div className="space-y-4">
             {messages.map((msg) => (
               <ChatMessage 
@@ -47,9 +47,16 @@ export const ChatWidget = () => {
               />
             ))}
             {isLoading && (
-              <div className="flex max-w-[80%] rounded-lg p-3 bg-gray-100 text-chatbot-dark animate-pulse">
-                <span>...</span>
-              </div>
+              <ChatMessage 
+                message={{
+                  id: 'loading',
+                  content: '',
+                  sender: 'bot',
+                  timestamp: new Date(),
+                  isLoading: true
+                }}
+                formatTime={formatTime}
+              />
             )}
             <div ref={messagesEndRef} />
           </div>

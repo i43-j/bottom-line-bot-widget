@@ -114,6 +114,10 @@ export default {
 				'scale-out': {
 					'0%': { transform: 'scale(1)' },
 					'100%': { transform: 'scale(0.9)' }
+				},
+				'bounce': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-4px)' }
 				}
 			},
 			animation: {

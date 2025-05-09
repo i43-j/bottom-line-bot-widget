@@ -12,10 +12,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, formatTime })
   return (
     <div 
       className={cn(
-        "flex flex-col max-w-[80%] rounded-lg p-3",
+        "flex flex-col max-w-[80%] rounded-lg p-3 animate-fade-in",
         message.sender === 'user' 
-          ? "bg-chatbot-red text-white ml-auto" 
-          : "bg-gray-100 text-chatbot-dark mr-auto"
+          ? "bg-chatbot-red text-white ml-auto shadow-md" 
+          : "bg-gray-100 text-chatbot-dark mr-auto shadow-sm"
       )}
     >
       <span className="text-sm">{message.content}</span>

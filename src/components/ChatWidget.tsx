@@ -14,6 +14,7 @@ export const ChatWidget = () => {
     inputMessage,
     isLoading,
     isPulsing,
+    isAnimating,
     messagesEndRef,
     inputRef,
     toggleChat,
@@ -36,7 +37,7 @@ export const ChatWidget = () => {
         <ChatHeader toggleChat={toggleChat} />
 
         {/* Messages Container */}
-        <div className="flex-1 p-4 overflow-y-auto h-[420px]">
+        <div className="flex-1 p-4 overflow-y-auto h-[420px] scroll-smooth">
           <div className="space-y-4">
             {messages.map((msg) => (
               <ChatMessage 
@@ -46,8 +47,8 @@ export const ChatWidget = () => {
               />
             ))}
             {isLoading && (
-              <div className="flex max-w-[80%] rounded-lg p-3 bg-gray-100 text-chatbot-dark">
-                <span className="animate-pulse">...</span>
+              <div className="flex max-w-[80%] rounded-lg p-3 bg-gray-100 text-chatbot-dark animate-pulse">
+                <span>...</span>
               </div>
             )}
             <div ref={messagesEndRef} />
@@ -69,17 +70,19 @@ export const ChatWidget = () => {
       <button
         onClick={toggleChat}
         className={cn(
-          "bg-chatbot-red hover:bg-red-600 text-white rounded-full p-4 shadow-lg transition-all duration-300",
-          isOpen ? "scale-90" : "animate-fade-in",
-          isPulsing && !isOpen ? "animate-[pulse_2s_infinite]" : ""
+          "bg-chatbot-red hover:bg-red-600 text-white rounded-full shadow-lg transition-all duration-300",
+          isOpen ? "scale-90 rotate-0" : "scale-100 hover:scale-105 rotate-0",
+          isPulsing && !isOpen ? "animate-[pulse_2s_infinite]" : "",
+          isAnimating && isOpen ? "animate-scale-in" : "",
+          isAnimating && !isOpen ? "animate-scale-out" : ""
         )}
-        style={{ width: "64px", height: "64px", display: "flex", alignItems: "center", justifyContent: "center" }}
+        style={{ width: "70px", height: "70px", display: "flex", alignItems: "center", justifyContent: "center" }}
         aria-label="Open chat"
       >
         {isOpen ? (
-          <ChevronDown className="h-7 w-7" />
+          <ChevronDown className="h-8 w-8 transition-transform duration-300" />
         ) : (
-          <MessageCircle className="h-7 w-7" />
+          <MessageCircle className="h-8 w-8 transition-transform duration-300" />
         )}
       </button>
     </div>

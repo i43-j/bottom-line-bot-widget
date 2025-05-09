@@ -9,6 +9,7 @@ export const useChatWidget = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isPulsing, setIsPulsing] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const [userId] = useState(() => {
     // Check if userId exists in localStorage, if not generate a new one
     const storedId = localStorage.getItem('chatWidgetUserId');
@@ -39,12 +40,18 @@ export const useChatWidget = () => {
 
   // Auto-scroll to the bottom of message container when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages]);
 
   // Focus input when chat is opened and manage pulsing animation
   useEffect(() => {
     if (isOpen) {
+      // Add animation flag
+      setIsAnimating(true);
+      setTimeout(() => setIsAnimating(false), 300);
+      
       inputRef.current?.focus();
       // When opened, clear the pulse effect
       if (pulseTimeoutRef.current) {
@@ -108,17 +115,17 @@ export const useChatWidget = () => {
       }
       
       // For now we'll simulate a response since we don't know how your webhook returns data
-const data = await response.json();
+      const data = await response.json();
 
-const botResponse: Message = {
-  id: (Date.now() + 1).toString(),
-  content: data.reply || "Sorry, I didn't understand that.",
-  sender: 'bot',
-  timestamp: new Date()
-};
+      const botResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        content: data.reply || "Sorry, I didn't understand that.",
+        sender: 'bot',
+        timestamp: new Date()
+      };
 
-setMessages(prev => [...prev, botResponse]);
-setIsLoading(false);
+      setMessages(prev => [...prev, botResponse]);
+      setIsLoading(false);
       
     } catch (error) {
       console.error('Error sending message:', error);
@@ -152,6 +159,7 @@ setIsLoading(false);
     inputMessage,
     isLoading,
     isPulsing,
+    isAnimating,
     messagesEndRef,
     inputRef,
     toggleChat,

@@ -30,7 +30,7 @@ export const ChatWidget = () => {
       <div 
         className={cn(
           "w-96 md:w-[420px] bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 mb-3",
-          isOpen ? "h-[450px] animate-slide-up" : "h-0 opacity-0 pointer-events-none"
+          isOpen ? "h-[250px] animate-slide-up" : "h-0 opacity-0 pointer-events-none"
         )}
       >
         {/* Chat Header */}

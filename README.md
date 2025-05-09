@@ -44,12 +44,39 @@ The widget will initialize automatically.
 The widget is pre-configured to use the webhook URL:
 `https://mactest2.app.n8n.cloud/webhook/cb3e7489-f7ea-45bf-b8d2-646b7942479b`
 
-To change the webhook URL, modify the `sendMessage` function in `src/components/ChatWidget.tsx`.
+To change the webhook URL, modify the `sendMessage` function in `src/components/chat/useChatWidget.ts`.
 
 ## Customization
 
-- Colors: Edit the `chatbot` colors in `tailwind.config.ts`
-- Styles: Modify the component styles in `ChatWidget.tsx`
+### Widget Size
+
+To adjust the widget size:
+
+1. Open `src/components/ChatWidget.tsx`
+2. Modify the height value in the className string:
+   ```jsx
+   isOpen ? "h-[500px] animate-slide-up" : "h-0 opacity-0 pointer-events-none"
+   ```
+3. Adjust the messages container height:
+   ```jsx
+   <div className="flex-1 p-4 overflow-y-auto h-[370px] scroll-smooth">
+   ```
+
+### Header Label
+
+To change the "Chat Support" label in the header:
+
+1. Open `src/components/chat/ChatHeader.tsx`
+2. Locate and change the header text:
+   ```jsx
+   <h3 className="font-semibold">Chat Support</h3>
+   ```
+   Replace "Chat Support" with your preferred label.
+
+### Colors
+
+- Edit the `chatbot` colors in `tailwind.config.ts`
+- Modify the component styles in `ChatWidget.tsx`
 
 ## Building the Standalone Widget
 

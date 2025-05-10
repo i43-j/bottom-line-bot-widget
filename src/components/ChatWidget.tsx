@@ -30,14 +30,14 @@ export const ChatWidget = () => {
       <div 
         className={cn(
           "w-96 md:w-[420px] bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 mb-3",
-          isOpen ? "h-[40vh] max-h-[500px] animate-slide-up" : "h-0 opacity-0 pointer-events-none"
+          isOpen ? "h-[70vh] max-h-[700px] animate-slide-up" : "h-0 opacity-0 pointer-events-none"
         )}
       >
         {/* Chat Header */}
         <ChatHeader toggleChat={toggleChat} />
 
         {/* Messages Container */}
-        <div className="flex-1 p-4 overflow-y-auto h-[calc(40vh-130px)] max-h-[370px] scroll-smooth">
+        <div className="flex-1 p-4 overflow-y-auto h-[calc(70vh-130px)] max-h-[570px] scroll-smooth">
           <div className="space-y-4">
             {messages.map((msg) => (
               <ChatMessage 

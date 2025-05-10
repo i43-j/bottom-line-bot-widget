@@ -9,6 +9,7 @@ A customizable chat widget that can be easily integrated into any website.
 - Expandable chat interface with smooth animations
 - Webhook integration for message handling
 - Mobile-responsive design
+- Markdown support for bot messages
 - Easy to integrate into any website
 
 ## Installation
@@ -50,16 +51,18 @@ To change the webhook URL, modify the `sendMessage` function in `src/components/
 
 ### Widget Size
 
-To adjust the widget size:
+The chat widget is configured to use 70% of the viewport height by default. To adjust this:
 
 1. Open `src/components/ChatWidget.tsx`
-2. Modify the height value in the className string to change the percentage of viewport height:
+2. Modify the height value in these two areas:
    ```jsx
-   isOpen ? "h-[40vh] max-h-[500px] animate-slide-up" : "h-0 opacity-0 pointer-events-none"
+   // Change the main container height percentage (70vh)
+   isOpen ? "h-[70vh] max-h-[700px] animate-slide-up" : "h-0 opacity-0 pointer-events-none"
    ```
-3. Adjust the messages container height accordingly:
+   
    ```jsx
-   <div className="flex-1 p-4 overflow-y-auto h-[calc(40vh-130px)] max-h-[370px] scroll-smooth">
+   // Change the messages container height calculation (should be 'vh percentage - 130px')
+   <div className="flex-1 p-4 overflow-y-auto h-[calc(70vh-130px)] max-h-[570px] scroll-smooth">
    ```
 
 ### Header Label

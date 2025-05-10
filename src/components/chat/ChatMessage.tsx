@@ -2,6 +2,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Message } from './types';
+import ReactMarkdown from 'react-markdown';
 
 interface ChatMessageProps {
   message: Message & { isLoading?: boolean };
@@ -25,7 +26,13 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, formatTime })
           <div className="w-2 h-2 rounded-full bg-gray-400 animate-[bounce_0.8s_infinite_0.3s]"></div>
         </div>
       ) : (
-        <span className="text-sm">{message.content}</span>
+        message.sender === 'bot' ? (
+          <div className="markdown-content text-sm prose prose-sm max-w-none">
+            <ReactMarkdown>{message.content}</ReactMarkdown>
+          </div>
+        ) : (
+          <span className="text-sm">{message.content}</span>
+        )
       )}
       <span className="text-xs opacity-70 mt-1 self-end">
         {formatTime(message.timestamp)}

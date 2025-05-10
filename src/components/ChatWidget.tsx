@@ -37,7 +37,7 @@ export const ChatWidget = () => {
         <ChatHeader toggleChat={toggleChat} />
 
         {/* Messages Container */}
-        <div className="flex-1 p-4 overflow-y-auto h-[calc(80vh-350px)] max-h-[370px] scroll-smooth">
+        <div className="flex-1 p-4 overflow-y-auto h-[calc(40vh-130px)] max-h-[370px] scroll-smooth">
           <div className="space-y-4">
             {messages.map((msg) => (
               <ChatMessage 

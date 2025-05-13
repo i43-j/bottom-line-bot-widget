@@ -1,4 +1,4 @@
-// src/hooks/useChatWidget.ts
+// File: src/hooks/useChatWidget.ts
 import { useState } from 'react';
 
 export type FormSchema = {
@@ -26,7 +26,7 @@ const WEBHOOK_URL = process.env.NEXT_PUBLIC_CHAT_HOOK!;
 export function useChatWidget(userId: string) {
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const append = (msg: Message) =>
+  const append = (msg: Omit<Message, 'id'>) =>
     setMessages((prev) => [...prev, { ...msg, id: Date.now().toString() }]);
 
   async function sendMessage(text: string) {
@@ -37,7 +37,6 @@ export function useChatWidget(userId: string) {
       body: JSON.stringify({ userId, message: text }),
     });
     const data = await res.json();
-
     if (data.form) {
       append({ sender: 'bot', text: data.reply, form: data.form });
     } else {

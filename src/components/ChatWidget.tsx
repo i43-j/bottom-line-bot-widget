@@ -1,65 +1,48 @@
-
-// src/components/ChatWidget.tsx
+// File: src/components/ChatWidget.tsx
 import React, { useState } from 'react';
 import { useChatWidget } from '../hooks/useChatWidget';
-import ChatForm from './ChatForm';
+import ChatForm from './chat/ChatForm';
 
 export default function ChatWidget({ userId }: { userId: string }) {
-  const { messages, sendMessage, submitForm } = useChatWidget(userId || '');
-  const [input, setInput] = useState('');
+  const { messages, sendMessage, submitForm } = useChatWidget(userId);
+  const [input, setInput] = useState<string>('');  // <-- always a string
 
   return (
-    <div style={{ width: 300, border: '1px solid #ccc', borderRadius: 8, overflow: 'hidden' }}>
-      <div style={{ padding: '1em', height: 400, overflowY: 'auto' }}>
-        {Array.isArray(messages) && messages.map((m) =>
+    <div className="chat-widget-container">
+      <div className="chat-messages">
+        {messages.map((m) =>
           m.form ? (
-            <ChatForm
-              key={m.id}
-              schema={m.form}
-              onSubmit={(vals) => submitForm(vals)}
-            />
+            <ChatForm key={m.id} schema={m.form} onSubmit={submitForm} />
           ) : (
             <div
               key={m.id}
-              style={{
-                margin: '0.5em 0',
-                textAlign: m.sender === 'bot' ? 'left' : 'right',
-              }}
+              className={`chat-bubble ${m.sender === 'bot' ? 'bot' : 'user'}`}
             >
-              <span
-                style={{
-                  display: 'inline-block',
-                  background: m.sender === 'bot' ? '#eee' : '#007bff',
-                  color: m.sender === 'bot' ? '#000' : '#fff',
-                  padding: '0.5em 1em',
-                  borderRadius: 16,
-                }}
-              >
-                {m.text || ''}
-              </span>
+              {m.text}
             </div>
           )
         )}
       </div>
 
       <form
+        className="chat-input-form"
         onSubmit={(e) => {
           e.preventDefault();
-          if (!input || !input.trim()) return;
-          sendMessage(input.trim());
+          // Safe-coerce to string and trim
+          const raw = input ?? '';
+          const text = raw.toString().trim();
+          if (!text) return;
+          sendMessage(text);
           setInput('');
         }}
-        style={{ display: 'flex', borderTop: '1px solid #ccc' }}
       >
         <input
-          style={{ flex: 1, padding: '0.5em', border: 'none' }}
+          type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type a message…"
         />
-        <button style={{ padding: '0.5em 1em' }} type="submit">
-          ➤
-        </button>
+        <button type="submit">➤</button>
       </form>
     </div>
   );

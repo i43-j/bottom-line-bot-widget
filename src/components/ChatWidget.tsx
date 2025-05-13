@@ -1,3 +1,4 @@
+// File: src/components/ChatWidget.tsx
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Message } from './chat/types';
@@ -16,27 +17,15 @@ export default function ChatWidget({ userId }: { userId: string }) {
 
   // Auto-scroll to the bottom of messages
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  }, [messages]);
 
   const handleSendMessage = async () => {
     const text = inputMessage.trim();
     if (!text) return;
-    
+
     setInputMessage('');
     setIsLoading(true);
-
-    // Create temporary loading message
-    const tempMessage: Message = {
-      id: `loading-${Date.now()}`,
-      content: text,
-      sender: 'user',
-      timestamp: new Date(),
-    };
 
     try {
       await sendMessage(text);
@@ -47,65 +36,74 @@ export default function ChatWidget({ userId }: { userId: string }) {
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
 
-  const formatTime = (date: Date) => {
-    return new Intl.DateTimeFormat('en-US', {
+  const formatTime = (date: Date) =>
+    new Intl.DateTimeFormat('en-US', {
       hour: '2-digit',
       minute: '2-digit',
     }).format(date);
-  };
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
-    // Focus the input when opening
     if (!isOpen) {
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
+      setTimeout(() => inputRef.current?.focus(), 100);
     }
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div
+      className="fixed bottom-4 right-4 z-50"
+      onClickCapture={(e) => e.stopPropagation()}
+      onKeyDownCapture={(e) => {
+        if (e.key === 'Enter') {
+          e.stopPropagation();
+          e.nativeEvent.stopImmediatePropagation();
+        }
+      }}
+    >
       {isOpen ? (
         <div className="bg-white rounded-lg shadow-xl flex flex-col w-[350px] h-[500px] animate-scale-in">
           <div className="bg-chatbot-red text-white p-3 rounded-t-lg flex justify-between items-center">
             <div className="font-medium">Chat Support</div>
-            <button 
-              onClick={toggleChat} 
+            <button
+              onClick={toggleChat}
               className="text-white/80 hover:text-white transition-colors p-1"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
+
           <div className="flex-1 overflow-y-auto p-3 bg-slate-50">
-            {messages.map((message) => (
-              <ChatMessage 
+            {messages.map((message: Message) => (
+              <ChatMessage
                 key={message.id}
                 message={message}
                 formatTime={formatTime}
               />
             ))}
+
             {isLoading && (
-              <ChatMessage 
+              <ChatMessage
                 message={{
                   id: `loading-${Date.now()}`,
                   content: '',
                   sender: 'bot',
                   timestamp: new Date(),
-                  isLoading: true
+                  isLoading: true,
                 }}
                 formatTime={formatTime}
               />
             )}
+
             <div ref={messagesEndRef} />
           </div>
+
           <ChatInput
             inputMessage={inputMessage}
             setInputMessage={setInputMessage}

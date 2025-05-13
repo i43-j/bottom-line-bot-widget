@@ -21,7 +21,8 @@ export type Message = {
   form?: FormSchema;
 };
 
-const WEBHOOK_URL = process.env.NEXT_PUBLIC_CHAT_HOOK || 'https://example.com/api/chat';
+// Use a hardcoded fallback URL instead of relying on process.env
+const WEBHOOK_URL = 'https://example.com/api/chat';
 
 export function useChatWidget(userId: string) {
   const [messages, setMessages] = useState<Message[]>([]);

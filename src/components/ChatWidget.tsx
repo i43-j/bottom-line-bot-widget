@@ -54,8 +54,8 @@ export default function ChatWidget({ userId }: { userId: string }) {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          // Safe handling of input
-          const trimmedInput = (input || '').trim();
+          // Added proper null checks with optional chaining and nullish coalescing
+          const trimmedInput = input?.trim() || '';
           if (!trimmedInput) return;
           sendMessage(trimmedInput);
           setInput('');
@@ -71,7 +71,7 @@ export default function ChatWidget({ userId }: { userId: string }) {
             padding: '0.5em',
             border: 'none'
           }}
-          value={input}
+          value={input || ''}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type a message…"
         />

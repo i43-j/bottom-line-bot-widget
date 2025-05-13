@@ -3,7 +3,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { Message } from './types';
 import ReactMarkdown from 'react-markdown';
-import { ChatForm } from './ChatForm';
+import ChatForm from './ChatForm';
 
 interface ChatMessageProps {
   message: Message & { isLoading?: boolean };
@@ -34,7 +34,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, formatTime })
               <ReactMarkdown>{message.content || ''}</ReactMarkdown>
             </div>
             {message.form && (
-              <ChatForm formConfig={message.form} messageId={message.id} />
+              <ChatForm schema={message.form} onSubmit={(data) => console.log('Form submitted:', data)} />
             )}
           </>
         ) : (

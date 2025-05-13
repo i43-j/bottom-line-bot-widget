@@ -1,132 +1,76 @@
 
 import React, { useState } from 'react';
 import { FormConfig } from './types';
-import { useForm } from 'react-hook-form';
-import { 
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { useChatContext } from './ChatContext';
 
-interface ChatFormProps {
-  formConfig: FormConfig;
-  messageId: string;
-}
+type Props = {
+  schema: FormConfig;
+  onSubmit: (data: Record<string, any>) => void;
+};
 
-export const ChatForm: React.FC<ChatFormProps> = ({ formConfig, messageId }) => {
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const { sendFormSubmission } = useChatContext();
-  
-  const form = useForm({
-    defaultValues: formConfig.fields.reduce((acc, field) => {
-      acc[field.id] = '';
-      return acc;
-    }, {} as Record<string, any>),
-  });
+export default function ChatForm({ schema, onSubmit }: Props) {
+  const [values, setValues] = useState<Record<string, any>>({});
 
-  const onSubmit = async (data: Record<string, any>) => {
-    await sendFormSubmission(messageId, data);
-    setIsSubmitted(true);
+  const handleInputChange = (fieldId: string, value: any) => {
+    setValues((prev) => ({ ...prev, [fieldId]: value }));
   };
 
-  if (isSubmitted) {
-    return (
-      <div className="mt-3 text-sm text-green-600">
-        Thank you! Your response has been submitted.
-      </div>
-    );
-  }
-
   return (
-    <div className="mt-4 bg-white p-4 rounded-md border border-gray-200">
-      {formConfig.title && (
-        <h3 className="font-medium mb-3 text-chatbot-dark">{formConfig.title}</h3>
-      )}
-      
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {formConfig.fields.map((field) => (
-            <FormField
-              key={field.id}
-              control={form.control}
-              name={field.id}
-              render={({ field: formField }) => (
-                <FormItem>
-                  <FormLabel>{field.label}{field.required ? ' *' : ''}</FormLabel>
-                  
-                  <FormControl>
-                    {field.type === 'text' || field.type === 'email' ? (
-                      <Input
-                        type={field.type}
-                        placeholder={field.placeholder}
-                        required={field.required}
-                        {...formField}
-                      />
-                    ) : field.type === 'textarea' ? (
-                      <Textarea
-                        placeholder={field.placeholder}
-                        required={field.required}
-                        {...formField}
-                      />
-                    ) : field.type === 'select' && field.options ? (
-                      <Select
-                        onValueChange={formField.onChange}
-                        defaultValue={formField.value}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder={field.placeholder || "Select an option"} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {field.options.map(option => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : field.type === 'radio' && field.options ? (
-                      <RadioGroup
-                        onValueChange={formField.onChange}
-                        defaultValue={formField.value}
-                        className="flex flex-col space-y-1"
-                      >
-                        {field.options.map(option => (
-                          <div key={option.value} className="flex items-center space-x-2">
-                            <RadioGroupItem value={option.value} id={`${field.id}-${option.value}`} />
-                            <label htmlFor={`${field.id}-${option.value}`} className="text-sm">
-                              {option.label}
-                            </label>
-                          </div>
-                        ))}
-                      </RadioGroup>
-                    ) : (
-                      <Input {...formField} />
-                    )}
-                  </FormControl>
-                  
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          ))}
-          
-          <Button 
-            type="submit" 
-            className="bg-chatbot-red hover:bg-red-600 text-white"
-          >
-            {formConfig.submitLabel}
-          </Button>
-        </form>
-      </Form>
-    </div>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit(values);
+      }}
+      className="mt-3 p-3 border border-gray-200 rounded-md bg-white"
+    >
+      <h4 className="font-medium text-sm mb-2">{schema?.title || 'Form'}</h4>
+      <div className="space-y-3">
+        {schema?.fields?.map((field) => (
+          <div key={field.id} className="space-y-1">
+            <label className="block text-xs font-medium">
+              {field.label} {field.required && <span className="text-red-500">*</span>}
+            </label>
+
+            {field.type === 'textarea' ? (
+              <textarea
+                className="w-full text-sm p-2 border border-gray-300 rounded resize-y min-h-[60px]"
+                required={field.required}
+                placeholder={field.placeholder || ''}
+                onChange={(e) => handleInputChange(field.id, e.target.value)}
+              />
+            ) : field.type === 'radio' && field.options ? (
+              <div className="flex flex-wrap gap-x-4">
+                {field.options.map((opt) => (
+                  <label key={opt.value} className="flex items-center space-x-1">
+                    <input
+                      type="radio"
+                      name={field.id}
+                      value={opt.value}
+                      required={field.required}
+                      onChange={() => handleInputChange(field.id, opt.value)}
+                      className="text-chatbot-red focus:ring-chatbot-red"
+                    />
+                    <span className="text-xs">{opt.label}</span>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <input
+                type={field.type}
+                required={field.required}
+                placeholder={field.placeholder || ''}
+                onChange={(e) => handleInputChange(field.id, e.target.value)}
+                className="w-full text-sm p-2 border border-gray-300 rounded"
+              />
+            )}
+          </div>
+        ))}
+      </div>
+      <button 
+        type="submit" 
+        className="mt-3 bg-chatbot-red hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors"
+      >
+        {schema?.submitLabel || 'Submit'}
+      </button>
+    </form>
   );
-};
+}

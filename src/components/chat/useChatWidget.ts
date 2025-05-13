@@ -1,223 +1,78 @@
 
-import { useState, useEffect, useRef } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { Message, FormConfig } from './types';
+import { useState } from 'react';
+import { FormConfig } from './types';
 
-export const useChatWidget = () => {
-  const [isOpen, setIsOpen] = useState(false);
+export type FormSchema = {
+  title: string; // Required in FormSchema
+  fields: Array<{
+    id: string;
+    label: string;
+    type: string;
+    placeholder?: string;
+    options?: Array<{ value: string; label: string }>;
+    required?: boolean;
+  }>;
+  submitLabel: string;
+};
+
+export type Message = {
+  id: string;
+  sender: 'user' | 'bot';
+  text?: string;
+  form?: FormSchema;
+};
+
+// Use a hardcoded fallback URL instead of relying on process.env
+const WEBHOOK_URL = 'https://example.com/api/chat';
+
+export function useChatWidget(userId: string) {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [inputMessage, setInputMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isPulsing, setIsPulsing] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [userId] = useState(() => {
-    // Check if userId exists in localStorage, if not generate a new one
-    const storedId = localStorage.getItem('chatWidgetUserId');
-    if (storedId) return storedId;
+
+  const append = (msg: Omit<Message, 'id'>) =>
+    setMessages((prev) => [...prev, { ...msg, id: Date.now().toString() }]);
+
+  async function sendMessage(text: string) {
+    if (!text || typeof text !== 'string') return;
     
-    const newId = uuidv4();
-    localStorage.setItem('chatWidgetUserId', newId);
-    return newId;
-  });
-
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  const pulseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Add welcome message when widget is first opened
-  useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      setMessages([
-        {
-          id: '1',
-          content: "Hello! How can I help you today?",
-          sender: 'bot',
-          timestamp: new Date()
-        }
-      ]);
-    }
-  }, [isOpen, messages.length]);
-
-  // Auto-scroll to the bottom of message container when new messages arrive
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages]);
-
-  // Focus input when chat is opened and manage pulsing animation
-  useEffect(() => {
-    if (isOpen) {
-      // Add animation flag
-      setIsAnimating(true);
-      setTimeout(() => setIsAnimating(false), 300);
-      
-      inputRef.current?.focus();
-      // When opened, clear the pulse effect
-      if (pulseTimeoutRef.current) {
-        clearTimeout(pulseTimeoutRef.current);
-        setIsPulsing(false);
-      }
-    } else {
-      // Start the pulse timer when chat is minimized
-      if (pulseTimeoutRef.current) {
-        clearTimeout(pulseTimeoutRef.current);
-      }
-      
-      pulseTimeoutRef.current = setTimeout(() => {
-        setIsPulsing(true);
-      }, 3000); // 3 seconds as requested
-    }
-    
-    // Cleanup
-    return () => {
-      if (pulseTimeoutRef.current) {
-        clearTimeout(pulseTimeoutRef.current);
-      }
-    };
-  }, [isOpen]);
-
-  const toggleChat = () => {
-    setIsOpen(!isOpen);
-  };
-
-  const sendMessage = async () => {
-    if (!inputMessage.trim()) return;
-    
-    // Add user message to chat
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: inputMessage.trim(),
-      sender: 'user',
-      timestamp: new Date()
-    };
-    
-    setMessages(prev => [...prev, userMessage]);
-    setInputMessage('');
-    setIsLoading(true);
-    
+    append({ sender: 'user', text });
     try {
-      // Send to webhook with the user ID in the required format
-      const response = await fetch('https://mactest2.app.n8n.cloud/webhook/cb3e7489-f7ea-45bf-b8d2-646b7942479b', {
+      const res = await fetch(WEBHOOK_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: userMessage.content,
-          timestamp: userMessage.timestamp,
-          userId: userId 
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, message: text }),
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to send message');
+      const data = await res.json();
+      if (data.form) {
+        // Ensure title is provided when creating the form
+        const formWithTitle = {
+          ...data.form,
+          title: data.form.title || "Form"
+        };
+        append({ sender: 'bot', text: data.reply, form: formWithTitle });
+      } else {
+        append({ sender: 'bot', text: data.reply });
       }
-      
-      // For now we'll simulate a response since we don't know how your webhook returns data
-      const data = await response.json();
-
-      const botResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        content: data.reply || "Sorry, I didn't understand that.",
-        sender: 'bot',
-        timestamp: new Date(),
-        form: data.form // If the webhook returns a form, it will be included here
-      };
-
-      setMessages(prev => [...prev, botResponse]);
-      setIsLoading(false);
-      
     } catch (error) {
       console.error('Error sending message:', error);
-      setIsLoading(false);
-      
-      // Add error message
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: "Sorry, there was an error sending your message. Please try again.",
-        sender: 'bot',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      append({ sender: 'bot', text: 'Sorry, there was an error processing your request.' });
     }
-  };
+  }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-
-  const sendFormSubmission = async (messageId: string, formData: Record<string, any>) => {
+  async function submitForm(formData: Record<string, any>) {
+    append({ sender: 'user', text: '(submitted form)' });
     try {
-      // Send the form data to the webhook
-      const response = await fetch('https://mactest2.app.n8n.cloud/webhook/cb3e7489-f7ea-45bf-b8d2-646b7942479b', {
+      const res = await fetch(WEBHOOK_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          formSubmission: true,
-          messageId,
-          formData,
-          userId
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, formSubmission: true, formData }),
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit form');
-      }
-
-      const data = await response.json();
-      
-      // If the server responds with a new message, add it
-      if (data.reply) {
-        const botResponse: Message = {
-          id: Date.now().toString(),
-          content: data.reply,
-          sender: 'bot',
-          timestamp: new Date(),
-          form: data.form // In case there's a follow-up form
-        };
-        
-        setMessages(prev => [...prev, botResponse]);
-      }
-      
-      return data;
+      const ack = await res.json();
+      append({ sender: 'bot', text: ack.message });
     } catch (error) {
       console.error('Error submitting form:', error);
-      // Add error message
-      const errorMessage: Message = {
-        id: Date.now().toString(),
-        content: "Sorry, there was an error submitting your form. Please try again.",
-        sender: 'bot',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, errorMessage]);
-      throw error;
+      append({ sender: 'bot', text: 'Sorry, there was an error submitting your form.' });
     }
-  };
+  }
 
-  return {
-    isOpen,
-    messages,
-    inputMessage,
-    isLoading,
-    isPulsing,
-    isAnimating,
-    messagesEndRef,
-    inputRef,
-    toggleChat,
-    sendMessage,
-    setInputMessage,
-    handleKeyPress,
-    formatTime,
-    sendFormSubmission
-  };
-};
+  return { messages, sendMessage, submitForm };
+}

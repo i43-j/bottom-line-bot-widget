@@ -6,5 +6,5 @@ import { initializeChatWidget } from './components/ChatWidgetProvider';
 initializeChatWidget();
 
 // Export components for direct import usage
-export { ChatWidget } from './components/ChatWidget';
+export { default as ChatWidget } from './components/ChatWidget';
 export { ChatWidgetProvider } from './components/ChatWidgetProvider';

@@ -3,91 +3,61 @@ import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { FormConfig, Message } from '../components/chat/types';
 
-// Use a hardcoded fallback URL instead of relying on process.env
-const WEBHOOK_URL = 'https://example.com/api/chat';
+export interface Message {
+  id: string;
+  sender: 'user' | 'bot';
+  text: string;
+  timestamp: string;
+  form?: any;
+}
+
+// 🔥 Hard-code your webhook URL here:
+const WEBHOOK_URL =
+  'https://mactest2.app.n8n.cloud/webhook/cb3e7489-f7ea-45bf-b8d2-646b7942479b';
 
 export function useChatWidget(userId: string) {
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const append = (msg: Omit<Message, 'id' | 'timestamp'>) => {
-    const newMessage: Message = {
-      ...msg,
-      id: uuidv4(),
-      timestamp: new Date()
-    };
-    setMessages((prev) => [...prev, newMessage]);
-  };
+  const append = (msg: Omit<Message, 'id'>) =>
+    setMessages((prev) => [
+      ...prev,
+      { ...msg, id: Date.now().toString() },
+    ]);
 
   async function sendMessage(text: string) {
-    if (!text || typeof text !== 'string') return;
-    
-    // Add user message immediately
-    append({ sender: 'user', content: text });
-    
-    try {
-      // In a real app, you'd send the message to a server
-      // For now, simulate a response
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Generate a proper bot response instead of echoing back
-      const botResponses = [
-        "Thanks for your message. How can I help you today?",
-        "I'm here to assist you. What do you need?",
-        "Hello there! What can I do for you?",
-        "Good question. Let me think about that.",
-        "I appreciate your message. Is there anything specific you'd like to know?"
-      ];
-      
-      // Select a random response
-      const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
-      append({ sender: 'bot', content: randomResponse });
-      
-      // Occasionally add a form for demo purposes
-      if (text.toLowerCase().includes('form') || Math.random() > 0.8) {
-        append({ 
-          sender: 'bot', 
-          content: 'Please fill out this form:',
-          form: {
-            title: 'Information Request',
-            fields: [
-              { id: 'name', label: 'Name', type: 'text', required: true },
-              { id: 'email', label: 'Email', type: 'email', required: true },
-              { id: 'feedback', label: 'Comments', type: 'textarea' }
-            ],
-            submitLabel: 'Submit'
-          } 
-        });
-      }
-    } catch (error) {
-      console.error('Error sending message:', error);
-      append({ 
-        sender: 'bot', 
-        content: 'Sorry, there was an error processing your request.'
-      });
-    }
-  }
-
-  async function submitForm(formData: Record<string, any>) {
-    append({ 
-      sender: 'user', 
-      content: '(submitted form)'
+    // 1️⃣ add the user's message
+    append({
+      sender: 'user',
+      text,
+      timestamp: new Date().toISOString(),
     });
-    
+
     try {
-      // Simulate processing form submission
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      append({ 
-        sender: 'bot', 
-        content: 'Thank you for submitting the form. We\'ll get back to you soon!'
+      // 2️⃣ POST to your webhook
+      const res = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, message: text }),
       });
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      append({ 
-        sender: 'bot', 
-        content: 'Sorry, there was an error submitting your form.'
+      const data = await res.json();
+
+      // 3️⃣ append the bot's reply (or form)
+      append({
+        sender: 'bot',
+        text: data.reply,
+        timestamp: new Date().toISOString(),
+        form: data.form,
+      });
+    } catch (err) {
+      console.error(err);
+      append({
+        sender: 'bot',
+        text: 'Oops—something went wrong. Please try again later.',
+        timestamp: new Date().toISOString(),
       });
     }
   }
 
-  return { messages, sendMessage, submitForm };
+  return { messages, sendMessage };
 }
+

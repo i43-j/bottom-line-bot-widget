@@ -1,8 +1,9 @@
 
 import { useState } from 'react';
+import { FormConfig } from './types';
 
 export type FormSchema = {
-  title: string;
+  title: string; // Required in FormSchema
   fields: Array<{
     id: string;
     label: string;
@@ -42,7 +43,12 @@ export function useChatWidget(userId: string) {
       });
       const data = await res.json();
       if (data.form) {
-        append({ sender: 'bot', text: data.reply, form: data.form });
+        // Ensure title is provided when creating the form
+        const formWithTitle = {
+          ...data.form,
+          title: data.form.title || "Form"
+        };
+        append({ sender: 'bot', text: data.reply, form: formWithTitle });
       } else {
         append({ sender: 'bot', text: data.reply });
       }

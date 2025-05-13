@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Message } from './types';
 import ReactMarkdown from 'react-markdown';
 import ChatForm from './ChatForm';
+import { FormConfig } from './types';
 
 interface ChatMessageProps {
   message: Message & { isLoading?: boolean };
@@ -34,7 +35,15 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, formatTime })
               <ReactMarkdown>{message.content || ''}</ReactMarkdown>
             </div>
             {message.form && (
-              <ChatForm schema={message.form} onSubmit={(data) => console.log('Form submitted:', data)} />
+              <ChatForm 
+                schema={{
+                  // Ensure title is provided as required by FormSchema
+                  title: message.form.title || "Form",
+                  fields: message.form.fields,
+                  submitLabel: message.form.submitLabel
+                }} 
+                onSubmit={(data) => console.log('Form submitted:', data)} 
+              />
             )}
           </>
         ) : (

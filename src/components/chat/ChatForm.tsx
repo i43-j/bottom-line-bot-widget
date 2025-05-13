@@ -1,10 +1,9 @@
 
 import React, { useState } from 'react';
-import type { FormSchema } from './useChatWidget';
-import { cn } from '@/lib/utils';
+import { FormConfig } from './types';
 
 type Props = {
-  schema: FormSchema;
+  schema: FormConfig;
   onSubmit: (data: Record<string, any>) => void;
 };
 

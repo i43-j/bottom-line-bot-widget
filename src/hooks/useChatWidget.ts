@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
-import { FormConfig, Message } from '../components/chat/types';
 import { v4 as uuidv4 } from 'uuid';
+import { FormConfig, Message } from '../components/chat/types';
 
 // Use a hardcoded fallback URL instead of relying on process.env
 const WEBHOOK_URL = 'https://example.com/api/chat';
@@ -29,8 +29,18 @@ export function useChatWidget(userId: string) {
       // For now, simulate a response
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Simulate a bot response
-      append({ sender: 'bot', content: `You said: ${text}` });
+      // Generate a proper bot response instead of echoing back
+      const botResponses = [
+        "Thanks for your message. How can I help you today?",
+        "I'm here to assist you. What do you need?",
+        "Hello there! What can I do for you?",
+        "Good question. Let me think about that.",
+        "I appreciate your message. Is there anything specific you'd like to know?"
+      ];
+      
+      // Select a random response
+      const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
+      append({ sender: 'bot', content: randomResponse });
       
       // Occasionally add a form for demo purposes
       if (text.toLowerCase().includes('form') || Math.random() > 0.8) {

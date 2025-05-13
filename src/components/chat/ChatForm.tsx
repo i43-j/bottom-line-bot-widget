@@ -1,7 +1,7 @@
 
-// src/components/ChatForm.tsx
+// src/components/chat/ChatForm.tsx
 import React, { useState } from 'react';
-import type { FormSchema } from '../hooks/useChatWidget';
+import type { FormSchema } from './useChatWidget';
 
 type Props = {
   schema: FormSchema;

@@ -30,14 +30,15 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, formatTime })
         message.sender === 'bot' ? (
           <>
             <div className="markdown-content text-sm prose prose-sm max-w-none">
-              <ReactMarkdown>{message.content}</ReactMarkdown>
+              {/* Safely handle content that might be undefined */}
+              <ReactMarkdown>{message.content || ''}</ReactMarkdown>
             </div>
             {message.form && (
               <ChatForm formConfig={message.form} messageId={message.id} />
             )}
           </>
         ) : (
-          <span className="text-sm">{message.content}</span>
+          <span className="text-sm">{message.content || ''}</span>
         )
       )}
       <span className="text-xs opacity-70 mt-1 self-end">

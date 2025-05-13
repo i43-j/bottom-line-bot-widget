@@ -1,16 +1,17 @@
+
 // src/components/ChatWidget.tsx
 import React, { useState } from 'react';
-import { useChatWidget, Message } from '../hooks/useChatWidget';
+import { useChatWidget } from '../hooks/useChatWidget';
 import ChatForm from './ChatForm';
 
 export default function ChatWidget({ userId }: { userId: string }) {
-  const { messages, sendMessage, submitForm } = useChatWidget(userId);
+  const { messages, sendMessage, submitForm } = useChatWidget(userId || '');
   const [input, setInput] = useState('');
 
   return (
     <div style={{ width: 300, border: '1px solid #ccc', borderRadius: 8, overflow: 'hidden' }}>
       <div style={{ padding: '1em', height: 400, overflowY: 'auto' }}>
-        {messages.map((m) =>
+        {Array.isArray(messages) && messages.map((m) =>
           m.form ? (
             <ChatForm
               key={m.id}
@@ -34,7 +35,7 @@ export default function ChatWidget({ userId }: { userId: string }) {
                   borderRadius: 16,
                 }}
               >
-                {m.text}
+                {m.text || ''}
               </span>
             </div>
           )
@@ -44,7 +45,7 @@ export default function ChatWidget({ userId }: { userId: string }) {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          if (!input.trim()) return;
+          if (!input || !input.trim()) return;
           sendMessage(input.trim());
           setInput('');
         }}

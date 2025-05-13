@@ -100,7 +100,7 @@ export default function ChatWidget({ userId }: { userId: string }) {
                   sender: "bot",
                   timestamp: new Date(),
                   isLoading: true
-                } as Message}
+                }}
                 formatTime={formatTime}
               />
             )}

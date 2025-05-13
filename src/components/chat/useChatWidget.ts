@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Message } from './types';
+import { Message, FormConfig } from './types';
 
 export const useChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -121,7 +121,8 @@ export const useChatWidget = () => {
         id: (Date.now() + 1).toString(),
         content: data.reply || "Sorry, I didn't understand that.",
         sender: 'bot',
-        timestamp: new Date()
+        timestamp: new Date(),
+        form: data.form // If the webhook returns a form, it will be included here
       };
 
       setMessages(prev => [...prev, botResponse]);
@@ -153,6 +154,56 @@ export const useChatWidget = () => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  const sendFormSubmission = async (messageId: string, formData: Record<string, any>) => {
+    try {
+      // Send the form data to the webhook
+      const response = await fetch('https://mactest2.app.n8n.cloud/webhook/cb3e7489-f7ea-45bf-b8d2-646b7942479b', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          formSubmission: true,
+          messageId,
+          formData,
+          userId
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit form');
+      }
+
+      const data = await response.json();
+      
+      // If the server responds with a new message, add it
+      if (data.reply) {
+        const botResponse: Message = {
+          id: Date.now().toString(),
+          content: data.reply,
+          sender: 'bot',
+          timestamp: new Date(),
+          form: data.form // In case there's a follow-up form
+        };
+        
+        setMessages(prev => [...prev, botResponse]);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      // Add error message
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        content: "Sorry, there was an error submitting your form. Please try again.",
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      throw error;
+    }
+  };
+
   return {
     isOpen,
     messages,
@@ -166,6 +217,7 @@ export const useChatWidget = () => {
     sendMessage,
     setInputMessage,
     handleKeyPress,
-    formatTime
+    formatTime,
+    sendFormSubmission
   };
 };

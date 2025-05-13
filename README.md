@@ -10,6 +10,7 @@ A customizable chat widget that can be easily integrated into any website.
 - Webhook integration for message handling
 - Mobile-responsive design
 - Markdown support for bot messages
+- Interactive forms for data collection
 - Easy to integrate into any website
 
 ## Installation
@@ -80,6 +81,79 @@ To change the "Chat Support" label in the header:
 
 - Edit the `chatbot` colors in `tailwind.config.ts`
 - Modify the component styles in `ChatWidget.tsx`
+
+## Adding Interactive Forms
+
+The chat widget supports interactive forms that can be sent from the bot to collect user input. To send a form, your webhook response should include a `form` property with the form configuration:
+
+```javascript
+{
+  "reply": "Please fill out this quick survey:",
+  "form": {
+    "title": "Customer Feedback",
+    "fields": [
+      {
+        "id": "name",
+        "label": "Your Name",
+        "type": "text",
+        "placeholder": "Enter your name",
+        "required": true
+      },
+      {
+        "id": "email",
+        "label": "Email Address",
+        "type": "email",
+        "placeholder": "your@email.com",
+        "required": true
+      },
+      {
+        "id": "rating",
+        "label": "How would you rate our service?",
+        "type": "radio",
+        "options": [
+          { "value": "excellent", "label": "Excellent" },
+          { "value": "good", "label": "Good" },
+          { "value": "fair", "label": "Fair" },
+          { "value": "poor", "label": "Poor" }
+        ],
+        "required": true
+      },
+      {
+        "id": "comments",
+        "label": "Additional Comments",
+        "type": "textarea",
+        "placeholder": "Tell us more..."
+      }
+    ],
+    "submitLabel": "Submit Feedback"
+  }
+}
+```
+
+When users submit the form, the data will be sent to your webhook with:
+
+```javascript
+{
+  "formSubmission": true,
+  "messageId": "123456",
+  "formData": {
+    "name": "John Doe",
+    "email": "john@example.com",
+    "rating": "excellent",
+    "comments": "Great service!"
+  },
+  "userId": "user-uuid"
+}
+```
+
+### Supported Form Field Types
+
+- `text`: Basic text input
+- `email`: Email input with validation
+- `select`: Dropdown select with options
+- `radio`: Radio button group
+- `checkbox`: Checkbox input (coming soon)
+- `textarea`: Multi-line text input
 
 ## Building the Standalone Widget
 

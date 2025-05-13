@@ -3,6 +3,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { Message } from './types';
 import ReactMarkdown from 'react-markdown';
+import { ChatForm } from './ChatForm';
 
 interface ChatMessageProps {
   message: Message & { isLoading?: boolean };
@@ -27,9 +28,14 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, formatTime })
         </div>
       ) : (
         message.sender === 'bot' ? (
-          <div className="markdown-content text-sm prose prose-sm max-w-none">
-            <ReactMarkdown>{message.content}</ReactMarkdown>
-          </div>
+          <>
+            <div className="markdown-content text-sm prose prose-sm max-w-none">
+              <ReactMarkdown>{message.content}</ReactMarkdown>
+            </div>
+            {message.form && (
+              <ChatForm formConfig={message.form} messageId={message.id} />
+            )}
+          </>
         ) : (
           <span className="text-sm">{message.content}</span>
         )

@@ -2,43 +2,70 @@
 import React from 'react';
 import { Send } from 'lucide-react';
 
+
+
 interface ChatInputProps {
-  inputMessage: string;
-  setInputMessage: (message: string) => void;
-  handleKeyPress: (e: React.KeyboardEvent) => void;
-  sendMessage: () => Promise<void>;
-  isLoading: boolean;
-  inputRef: React.RefObject<HTMLTextAreaElement>;
+  inputMessage: string
+  setInputMessage: (msg: string) => void
+  sendMessage: (text: string) => Promise<void>
+  isLoading: boolean
+  inputRef: React.RefObject<HTMLTextAreaElement>
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({ 
-  inputMessage, 
-  setInputMessage, 
-  handleKeyPress, 
+export function ChatInput({
+  inputMessage,
+  setInputMessage,
   sendMessage,
   isLoading,
-  inputRef
-}) => {
+  inputRef,
+}: ChatInputProps) {
+  // Handle Enter without letting it bubble up to close the widget
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      e.stopPropagation()           // ← prevent chat bubble from closing
+      const text = inputMessage.trim()
+      if (!text) return
+      setInputMessage('')
+      await sendMessage(text)
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    e.stopPropagation()             // ← also here, just in case
+    const text = inputMessage.trim()
+    if (!text) return
+    setInputMessage('')
+    await sendMessage(text)
+  }
+
   return (
-    <div className="border-t p-3 bg-white">
-      <div className="flex items-end gap-2">
-        <textarea
-          ref={inputRef}
-          className="flex-1 resize-none border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-chatbot-red min-h-[40px] max-h-[120px] transition-all duration-200"
-          placeholder="Type a message..."
-          value={inputMessage}
-          onChange={(e) => setInputMessage(e.target.value)}
-          onKeyDown={handleKeyPress}
-          rows={1}
-        />
-        <button
-          onClick={sendMessage}
-          disabled={!inputMessage.trim() || isLoading}
-          className="bg-chatbot-red hover:bg-red-600 disabled:bg-gray-300 text-white p-2 rounded-lg transition-all duration-200 hover:scale-105 active:scale-95"
-        >
-          <Send className="h-5 w-5" />
-        </button>
-      </div>
-    </div>
-  );
-};
+    <form
+      onSubmit={handleSubmit}
+      style={{ display: 'flex', borderTop: '1px solid #ccc' }}
+    >
+      <textarea
+        ref={inputRef}
+        value={inputMessage}
+        onChange={e => setInputMessage(e.target.value)}
+        onKeyDown={handleKeyDown}   // ← wired to KeyDown
+        placeholder="Type your message…"
+        style={{
+          flex: 1,
+          padding: 8,
+          border: 'none',
+          resize: 'none',
+        }}
+        rows={1}
+      />
+      <button
+        type="submit"
+        disabled={isLoading}
+        style={{ padding: '0 16px' }}
+      >
+        ➤
+      </button>
+    </form>
+  )
+}

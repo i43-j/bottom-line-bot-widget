@@ -1,8 +1,7 @@
+// File: src/components/chat/ChatInput.tsx
 
-import React from 'react';
-import { Send } from 'lucide-react';
-
-
+import React from 'react'
+import { Send } from 'lucide-react'
 
 interface ChatInputProps {
   inputMessage: string
@@ -19,11 +18,11 @@ export function ChatInput({
   isLoading,
   inputRef,
 }: ChatInputProps) {
-  // Handle Enter without letting it bubble up to close the widget
+  // Handle Enter key without closing the widget
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      e.stopPropagation()           // ← prevent chat bubble from closing
+      e.stopPropagation()
       const text = inputMessage.trim()
       if (!text) return
       setInputMessage('')
@@ -31,9 +30,10 @@ export function ChatInput({
     }
   }
 
+  // Handle form submit (clicking the send button)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    e.stopPropagation()             // ← also here, just in case
+    e.stopPropagation()
     const text = inputMessage.trim()
     if (!text) return
     setInputMessage('')
@@ -43,28 +43,23 @@ export function ChatInput({
   return (
     <form
       onSubmit={handleSubmit}
-      style={{ display: 'flex', borderTop: '1px solid #ccc' }}
+      className="flex border-t border-gray-200"
     >
       <textarea
         ref={inputRef}
         value={inputMessage}
-        onChange={e => setInputMessage(e.target.value)}
-        onKeyDown={handleKeyDown}   // ← wired to KeyDown
+        onChange={(e) => setInputMessage(e.target.value)}
+        onKeyDown={handleKeyDown}
         placeholder="Type your message…"
-        style={{
-          flex: 1,
-          padding: 8,
-          border: 'none',
-          resize: 'none',
-        }}
+        className="flex-1 p-2 resize-none focus:outline-none"
         rows={1}
       />
       <button
         type="submit"
         disabled={isLoading}
-        style={{ padding: '0 16px' }}
+        className="p-2 ml-2 bg-chatbot-red hover:bg-red-600 text-white rounded-full transition"
       >
-        ➤
+        <Send className="h-5 w-5" />
       </button>
     </form>
   )

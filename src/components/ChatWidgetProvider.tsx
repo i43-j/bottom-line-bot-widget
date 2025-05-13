@@ -1,14 +1,14 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ChatWidget from './ChatWidget';
 
-// Create a client
-const queryClient = new QueryClient();
-
 // Component for use within React applications
 export const ChatWidgetProvider: React.FC = () => {
+  // Create a QueryClient instance inside the component
+  const queryClient = new QueryClient();
+  
   return (
     <QueryClientProvider client={queryClient}>
       <ChatWidget userId="" />
@@ -34,9 +34,7 @@ export const initializeChatWidget = () => {
     const root = createRoot(container);
     root.render(
       <React.StrictMode>
-        <QueryClientProvider client={queryClient}>
-          <ChatWidget userId="" />
-        </QueryClientProvider>
+        <ChatWidgetProvider />
       </React.StrictMode>
     );
   } else {
@@ -46,9 +44,7 @@ export const initializeChatWidget = () => {
       const root = createRoot(container);
       root.render(
         <React.StrictMode>
-          <QueryClientProvider client={queryClient}>
-            <ChatWidget userId="" />
-          </QueryClientProvider>
+          <ChatWidgetProvider />
         </React.StrictMode>
       );
     });
